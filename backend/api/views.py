@@ -218,3 +218,20 @@ class RecipeViewSet(ModelViewSet):
         )
 
         return response
+
+    @action(
+        detail=True,
+        methods=['get'],
+        url_path='get-link',
+    )
+    def get_link(self, request, pk=None):
+        """Получение ссылки на рецепт."""
+
+        recipe = self.get_object()
+        short_link = request.build_absolute_uri(
+            f'/api/recipes/{recipe.id}/'
+        )
+
+        return Response({
+            'short-link': short_link,
+        })

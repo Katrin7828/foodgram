@@ -137,6 +137,22 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             'cooking_time',
         ]
 
+    def validate(self, attrs):
+        """Проверяет обязательные поля при создании и обновлении."""
+
+        if self.instance is not None:
+            if 'ingredients' not in self.initial_data:
+                raise serializers.ValidationError({
+                    'ingredients': 'Это поле обязательно.'
+                })
+
+            if 'tags' not in self.initial_data:
+                raise serializers.ValidationError({
+                    'tags': 'Это поле обязательно.'
+                })
+
+        return attrs
+
     def validate_ingredients(self, value):
         """Проверяет наличие ингредиентов и отсутствие повторений."""
 
