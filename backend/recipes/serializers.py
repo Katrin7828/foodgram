@@ -115,6 +115,17 @@ class IngredientWriteSerializer(serializers.ModelSerializer):
         fields = ('id', 'amount',)
 
 
+class RecipeImageField(Base64ImageField):
+    """Поле изображения с запретом пустой строки."""
+
+    def to_internal_value(self, data):
+        if data == '':
+            raise serializers.ValidationError(
+                'Изображение не может быть пустым.'
+            )
+        return super().to_internal_value(data)
+
+
 class RecipeWriteSerializer(serializers.ModelSerializer):
     """Сериализатор для создания и редактирования рецептов."""
 
@@ -123,7 +134,11 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         many=True,
         queryset=Tag.objects.all(),
     )
-    image = Base64ImageField()
+    image = RecipeImageField(
+        required=True,
+        allow_null=False,
+        allow_empty_file=False,
+    )
 
     class Meta:
         model = Recipe
