@@ -5,7 +5,7 @@ from .models import User
 
 
 @admin.register(User)
-class CustomUserAdmin(UserAdmin):
+class FoodgramUserAdmin(UserAdmin):
     """Настройка административной панели пользователей."""
 
     list_display = ('id', 'username', 'email', 'first_name', 'last_name')

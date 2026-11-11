@@ -1,22 +1,16 @@
-from django.urls import path
+from django.urls import include, path
+from rest_framework.routers import SimpleRouter
 
-from .views import AvatarView, SubscribeView, SubscriptionListView
+from .views import FoodgramUserViewSet
 
+
+router = SimpleRouter()
+router.register(
+    'users',
+    FoodgramUserViewSet,
+    basename='users',
+)
 
 urlpatterns = [
-    path(
-        'users/<int:id>/subscribe/',
-        SubscribeView.as_view(),
-        name='user-subscribe',
-    ),
-    path(
-        'users/subscriptions/',
-        SubscriptionListView.as_view(),
-        name='user-subscriptions',
-    ),
-    path(
-        'users/me/avatar/',
-        AvatarView.as_view(),
-        name='user-avatar',
-    ),
+    path('', include(router.urls)),
 ]

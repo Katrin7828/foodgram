@@ -1,14 +1,8 @@
 from rest_framework import serializers
-from djoser.serializers import (
-    UserCreateSerializer as DjoserUserCreateSerializer,
-)
+from drf_extra_fields.fields import Base64ImageField
 
 from .models import User, Follow
 from recipes.short_serializers import RecipeShortSerializer
-from recipes.fields import Base64ImageField
-
-
-USER_FIELDS = ['id', 'username', 'email', 'first_name', 'last_name']
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -18,27 +12,29 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = [*USER_FIELDS, 'avatar', 'is_subscribed']
+        fields: tuple[str, ...] = (
+            'id',
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'avatar',
+            'is_subscribed',
+        )
 
     def get_is_subscribed(self, obj):
-        """Проверить подписку текущего пользователя на автора."""
+        """Проверяет подписку текущего пользователя на автора."""
+
         request = self.context.get('request')
 
-        if request is None or not request.user.is_authenticated:
-            return False
-
-        return Follow.objects.filter(
-            user=request.user,
-            author=obj
-        ).exists()
-
-
-class UserCreateSerializer(DjoserUserCreateSerializer):
-    """Сериализатор регистрации пользователя."""
-
-    class Meta(DjoserUserCreateSerializer.Meta):
-        model = User
-        fields = [*USER_FIELDS, 'password']
+        return bool(
+            request
+            and request.user.is_authenticated
+            and Follow.objects.filter(
+                user=request.user,
+                author=obj,
+            ).exists()
+        )
 
 
 class SubscriptionSerializer(UserSerializer):
@@ -46,6 +42,13 @@ class SubscriptionSerializer(UserSerializer):
 
     recipes_count = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
+
+    class Meta(UserSerializer.Meta):
+        fields: tuple[str, ...] = (
+            *UserSerializer.Meta.fields,
+            'recipes_count',
+            'recipes',
+        )
 
     def get_recipes_count(self, obj):
         """Вернуть количество рецептов автора."""
@@ -62,7 +65,9 @@ class SubscriptionSerializer(UserSerializer):
 
             if recipes_limit is not None and recipes_limit.isdigit():
                 limit = int(recipes_limit)
-                recipes = recipes[:limit]
+
+                if limit > 0:
+                    recipes = recipes[:limit]
 
         serializer = RecipeShortSerializer(
             recipes,
@@ -71,8 +76,42 @@ class SubscriptionSerializer(UserSerializer):
         )
         return serializer.data
 
-    class Meta(UserSerializer.Meta):
-        fields = [*UserSerializer.Meta.fields, 'recipes_count', 'recipes']
+
+class FollowSerializer(serializers.ModelSerializer):
+    """Сериализатор создания и проверки подписки."""
+
+    class Meta:
+        model = Follow
+        fields = ('user', 'author')
+
+    def validate(self, attrs):
+        """Проверяет возможность подписки на автора."""
+
+        user = attrs['user']
+        author = attrs['author']
+
+        if user == author:
+            raise serializers.ValidationError(
+                'Нельзя подписаться на самого себя.'
+            )
+
+        if Follow.objects.filter(
+            user=user,
+            author=author,
+        ).exists():
+            raise serializers.ValidationError(
+                'Вы уже подписаны на этого автора.'
+            )
+
+        return attrs
+
+    def to_representation(self, instance):
+        """Возвращает информацию об авторе подписки."""
+
+        return SubscriptionSerializer(
+            instance.author,
+            context=self.context,
+        ).data
 
 
 class AvatarSerializer(serializers.ModelSerializer):
@@ -82,4 +121,4 @@ class AvatarSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['avatar']
+        fields = ('avatar',)
