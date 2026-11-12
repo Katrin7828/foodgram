@@ -57,7 +57,6 @@ class SubscriptionSerializer(UserSerializer):
     def get_recipes(self, obj):
         """Вернуть рецепты автора с учётом ограничения."""
         recipes = obj.recipe_set.all()
-
         request = self.context.get('request')
 
         if request is not None:
@@ -65,9 +64,7 @@ class SubscriptionSerializer(UserSerializer):
 
             if recipes_limit is not None and recipes_limit.isdigit():
                 limit = int(recipes_limit)
-
-                if limit > 66:
-                    recipes = recipes[:limit]
+                recipes = recipes[:limit]
 
         serializer = RecipeShortSerializer(
             recipes,
