@@ -82,7 +82,6 @@ class RecipeViewSet(ModelViewSet):
                 'user': request.user.pk,
                 'recipe': recipe.pk,
             },
-            context={'request': request},
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -125,7 +124,6 @@ class RecipeViewSet(ModelViewSet):
                 'user': request.user.pk,
                 'recipe': recipe.pk,
             },
-            context={'request': request},
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -202,11 +200,6 @@ class RecipeViewSet(ModelViewSet):
         """Возвращает короткую ссылку на рецепт."""
 
         recipe = self.get_object()
-
-        if not recipe.short_code:
-            recipe.short_code = recipe.generate_short_code()
-            recipe.save(update_fields=['short_code'])
-
         short_link = request.build_absolute_uri(
             f'/s/{recipe.short_code}/'
         )

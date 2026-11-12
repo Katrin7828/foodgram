@@ -2,8 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import F, Q
 
-
-USER_LENGTH = 150
+from .constants import USER_LENGTH
 
 
 class User(AbstractUser):

@@ -82,19 +82,10 @@ class FoodgramUserViewSet(UserViewSet):
         authors = User.objects.filter(
             subscribers__user=request.user,
         )
-
         page = self.paginate_queryset(authors)
 
-        if page is not None:
-            serializer = SubscriptionSerializer(
-                page,
-                many=True,
-                context=self.get_serializer_context(),
-            )
-            return self.get_paginated_response(serializer.data)
-
         serializer = SubscriptionSerializer(
-            authors,
+            page,
             many=True,
             context=self.get_serializer_context(),
         )

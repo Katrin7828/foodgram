@@ -4,24 +4,25 @@ import string
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+from .constants import (
+    MAX_COOKING_TIME,
+    MAX_INGREDIENT_NAME_LENGTH,
+    MAX_MEASUREMENT_UNIT_LENGTH,
+    MAX_RECIPE_NAME_LENGTH,
+    MAX_TAG_LENGTH,
+    MIN_INGREDIENT_AMOUNT,
+    SHORT_CODE_LENGTH,
+    MIN_COOKING_TIME,
+)
+
 from users.models import User
-
-
-INGREDIENT_LENGTH = 128
-MEASUREMENT_LENGTH = 64
-TAG_LENGTH = 32
-RECIPE_LENGTH = 256
-CODE_LENGTH = 10
-SHORT_CODE_LENGTH = 6
-MIN_AMOUNT = 1
-MAX_COOKING_TIME = 32000
 
 
 class Ingredient(models.Model):
     """Модель для ингредиентов."""
 
-    name = models.CharField(max_length=INGREDIENT_LENGTH)
-    measurement_unit = models.CharField(max_length=MEASUREMENT_LENGTH)
+    name = models.CharField(max_length=MAX_INGREDIENT_NAME_LENGTH)
+    measurement_unit = models.CharField(max_length=MAX_MEASUREMENT_UNIT_LENGTH)
 
     class Meta:
         verbose_name = 'Ингредиент'
@@ -40,8 +41,8 @@ class Ingredient(models.Model):
 class Tag(models.Model):
     """Модель тега."""
 
-    name = models.CharField(max_length=TAG_LENGTH, unique=True)
-    slug = models.SlugField(max_length=TAG_LENGTH, unique=True)
+    name = models.CharField(max_length=MAX_TAG_LENGTH, unique=True)
+    slug = models.SlugField(max_length=MAX_TAG_LENGTH, unique=True)
 
     class Meta:
         verbose_name = 'Тег'
@@ -55,13 +56,13 @@ class Recipe(models.Model):
     """Модель рецептов."""
 
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=RECIPE_LENGTH)
+    name = models.CharField(max_length=MAX_RECIPE_NAME_LENGTH)
     image = models.ImageField(blank=False)
     text = models.TextField()
     tags = models.ManyToManyField(Tag)
     cooking_time = models.PositiveSmallIntegerField(
         validators=[
-            MinValueValidator(MIN_AMOUNT),
+            MinValueValidator(MIN_COOKING_TIME),
             MaxValueValidator(MAX_COOKING_TIME),
         ]
     )
@@ -71,7 +72,7 @@ class Recipe(models.Model):
         through='RecipeIngredient',
     )
     short_code = models.CharField(
-        max_length=CODE_LENGTH,
+        max_length=SHORT_CODE_LENGTH,
         unique=True,
         null=True,
         blank=True,
@@ -85,6 +86,14 @@ class Recipe(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        """Создаёт короткий код при первом сохранении рецепта."""
+
+        if self._state.adding and not self.short_code:
+            self.short_code = self.generate_short_code()
+
+        super().save(*args, **kwargs)
 
     @staticmethod
     def generate_short_code():
@@ -101,14 +110,6 @@ class Recipe(models.Model):
             if not Recipe.objects.filter(short_code=code).exists():
                 return code
 
-    def save(self, *args, **kwargs):
-        """Создаёт короткий код при первом сохранении рецепта."""
-
-        if self._state.adding and not self.short_code:
-            self.short_code = self.generate_short_code()
-
-        super().save(*args, **kwargs)
-
 
 class RecipeIngredient(models.Model):
     """Промежуточная модель между рецептом и ингредиентом."""
@@ -116,7 +117,8 @@ class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     amount = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(MIN_AMOUNT)]
+        validators=[MinValueValidator(MIN_INGREDIENT_AMOUNT),
+                    MaxValueValidator(MAX_COOKING_TIME)]
     )
 
     class Meta:

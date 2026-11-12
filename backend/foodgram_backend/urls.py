@@ -8,7 +8,6 @@ from recipes.views import redirect_to_recipe
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('users.urls')),
-    path('api/', include('djoser.urls')),
     path('api/auth/', include('djoser.urls.authtoken')),
     path('api/', include('api.urls')),
     path('s/<str:short_code>/', redirect_to_recipe, name='recipe_short_link'),

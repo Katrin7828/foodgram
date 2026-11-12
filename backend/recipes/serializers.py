@@ -4,7 +4,6 @@ from drf_extra_fields.fields import Base64ImageField
 
 from users.serializers import UserSerializer
 
-
 from .models import (Favorite, Ingredient, Recipe,
                      RecipeIngredient, ShoppingCart, Tag)
 from .short_serializers import RecipeShortSerializer
@@ -115,17 +114,6 @@ class IngredientWriteSerializer(serializers.ModelSerializer):
         fields = ('id', 'amount',)
 
 
-class RecipeImageField(Base64ImageField):
-    """Поле изображения с запретом пустой строки."""
-
-    def to_internal_value(self, data):
-        if data == '':
-            raise serializers.ValidationError(
-                'Изображение не может быть пустым.'
-            )
-        return super().to_internal_value(data)
-
-
 class RecipeWriteSerializer(serializers.ModelSerializer):
     """Сериализатор для создания и редактирования рецептов."""
 
@@ -134,7 +122,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         many=True,
         queryset=Tag.objects.all(),
     )
-    image = RecipeImageField(
+    image = Base64ImageField(
         required=True,
         allow_null=False,
         allow_empty_file=False,
