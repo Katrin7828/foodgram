@@ -141,6 +141,10 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         """Проверяет ингредиенты и теги рецепта."""
+        if self.initial_data.get('image') == '':
+            raise serializers.ValidationError({
+                'image': 'Изображение не может быть пустым.'
+            })
 
         ingredients = attrs.get('ingredients')
         tags = attrs.get('tags')

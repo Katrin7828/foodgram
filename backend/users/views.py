@@ -89,7 +89,7 @@ class FoodgramUserViewSet(UserViewSet):
             many=True,
             context=self.get_serializer_context(),
         )
-        return Response(serializer.data)
+        return self.get_paginated_response(serializer.data)
 
     @action(
         detail=False,
