@@ -13,7 +13,7 @@ services:
       retries: 10
 
   backend:
-    image: katrin7828/foodgram_backend:latest
+    image: ${DOCKER_USERNAME}/foodgram_backend:latest
     restart: always
     env_file:
       - .env
@@ -25,7 +25,7 @@ services:
       - backend_media:/app/media
 
   frontend:
-    image: katrin7828/foodgram_frontend:latest
+    image: ${DOCKER_USERNAME}/foodgram_frontend:latest
     volumes:
       - frontend_build:/app/result_build
 

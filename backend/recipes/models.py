@@ -14,7 +14,6 @@ from .constants import (
     SHORT_CODE_LENGTH,
     MIN_COOKING_TIME,
 )
-
 from users.models import User
 
 
@@ -117,8 +116,7 @@ class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     amount = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(MIN_INGREDIENT_AMOUNT),
-                    MaxValueValidator(MAX_COOKING_TIME)]
+        validators=[MinValueValidator(MIN_INGREDIENT_AMOUNT)],
     )
 
     class Meta:
