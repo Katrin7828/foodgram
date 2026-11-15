@@ -65,7 +65,7 @@ class SubscriptionSerializer(UserSerializer):
             if recipes_limit is not None and recipes_limit.isdigit():
                 limit = int(recipes_limit)
 
-                if 0 < limit <= 66:
+                if limit > 0:
                     recipes = recipes[:limit]
 
         serializer = RecipeShortSerializer(
