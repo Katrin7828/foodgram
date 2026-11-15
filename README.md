@@ -41,7 +41,7 @@
 
 ## Развёрнутый проект
 
-**Foodgram доступен по адресу:** http://51.250.1.60/
+**Foodgram доступен по адресу:** http://51.250.1.60/ и http://foodgram-katrin7828.duckdns.org/
 
 Приложение развёрнуто на удалённом сервере с использованием Docker Compose, PostgreSQL, Gunicorn и Nginx.
 
@@ -163,7 +163,10 @@ docker compose exec backend python manage.py createsuperuser
 
 Перед использованием приложения необходимо загрузить ингредиенты в базу данных PostgreSQL.
 
-Способ импорта зависит от формата данных и предусмотренного в проекте механизма загрузки. Файлы CSV и JSON служат исходными наборами данных; они не загружаются в PostgreSQL автоматически при запуске контейнеров.
+# Добавить теги
+docker compose -f infra/docker-local.yml python manage.py add_tags
+# Добавить ингредиенты
+docker compose -f infra/docker-local.yml python manage.py add_ingredients
 
 ## Документация API
 
