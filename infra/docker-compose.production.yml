@@ -23,6 +23,7 @@ services:
     volumes:
       - backend_static:/app/staticfiles
       - backend_media:/app/media
+      - ../data:/data:ro
 
   frontend:
     image: ${DOCKER_USERNAME}/foodgram_frontend:latest

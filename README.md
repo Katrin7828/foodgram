@@ -161,22 +161,30 @@ docker compose exec backend python manage.py createsuperuser
 авокадо,г
 ```
 
-Перед использованием приложения необходимо загрузить ингредиенты в базу данных PostgreSQL.
+Перед использованием приложения необходимо загрузить ингредиенты
+и стандартные теги в базу данных PostgreSQL.
 
-# Добавить теги
-docker compose -f infra/docker-local.yml python manage.py add_tags
-# Добавить ингредиенты
-docker compose -f infra/docker-local.yml python manage.py add_ingredients
+Команды выполняются из корневой директории проекта после запуска
+контейнеров Docker Compose.
 
-## Документация API
+### Загрузка тегов
 
-Документация API находится в директории `docs`.
+```bash
+docker compose -f infra/docker-compose.yml exec backend python manage.py load_tags
+```
 
-При корректной настройке Nginx документация доступна по адресу:
+Команда создаёт три стандартных тега: «Завтрак», «Обед» и «Ужин».
 
-**http://localhost:8080/api/docs/**
+### Загрузка ингредиентов
 
-API предоставляет возможности для работы с пользователями, рецептами, ингредиентами, тегами, подписками, избранным и списком покупок.
+```bash
+docker compose -f infra/docker-compose.yml exec backend python manage.py load_ingredients
+```
+
+Команда загружает ингредиенты из файла `data/ingredients.json`.
+
+При повторном запуске команды уже существующие ингредиенты и теги
+не дублируются.
 
 ## Примеры API-запросов
 

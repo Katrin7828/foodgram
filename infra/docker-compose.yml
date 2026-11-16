@@ -24,6 +24,7 @@ services:
     volumes:
       - backend_static:/app/staticfiles
       - backend_media:/app/media
+      - ../data:/data:ro
 
   frontend:
     container_name: foodgram-front
